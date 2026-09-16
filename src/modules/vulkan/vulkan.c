@@ -17,22 +17,22 @@ bool ffPrintVulkan(FFVulkanOptions* options) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Vulkan), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if (vulkan->apiVersion.length == 0 && vulkan->driver.length == 0) {
-            ffStrbufWriteTo(&vulkan->instanceVersion, stdout);
-            puts(" [Software only]");
+            ffPrintBuffer(&vulkan->instanceVersion);
+            ffPrintLine(" [Software only]");
         } else {
             if (vulkan->apiVersion.length > 0) {
-                ffStrbufWriteTo(&vulkan->apiVersion, stdout);
+                ffPrintBuffer(&vulkan->apiVersion);
 
                 if (vulkan->driver.length > 0) {
-                    fputs(" - ", stdout);
+                    ffPrintS(" - ");
                 }
             }
 
             if (vulkan->driver.length > 0) {
-                ffStrbufWriteTo(&vulkan->driver, stdout);
+                ffPrintBuffer(&vulkan->driver);
             }
 
-            putchar('\n');
+            ffPrintC('\n');
         }
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Vulkan), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

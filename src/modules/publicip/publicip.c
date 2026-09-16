@@ -18,9 +18,9 @@ bool ffPrintPublicIp(FFPublicIPOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(PublicIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.location.length) {
-            printf("%s (%s)\n", result.ip.chars, result.location.chars);
+            ffPrintF("%s (%s)\n", result.ip.chars, result.location.chars);
         } else {
-            ffStrbufPutTo(&result.ip, stdout);
+            ffPrintBufferLine(&result.ip);
         }
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(PublicIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

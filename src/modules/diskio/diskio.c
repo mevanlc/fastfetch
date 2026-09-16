@@ -58,7 +58,7 @@ bool ffPrintDiskIO(FFDiskIOOptions* options) {
                 ffStrbufAppendS(&buffer, "/s");
             }
             ffStrbufAppendS(&buffer, " (W)");
-            ffStrbufPutTo(&buffer, stdout);
+            ffPrintBufferLine(&buffer);
         } else {
             ffSizeAppendNum(dev->bytesRead, &buffer);
             if (!options->detectTotal) {

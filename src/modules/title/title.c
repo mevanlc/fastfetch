@@ -47,9 +47,9 @@ bool ffPrintTitle(FFTitleOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Title), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        ffStrbufWriteTo(&userNameColored, stdout);
-        ffStrbufWriteTo(&atColored, stdout);
-        ffStrbufPutTo(&hostNameColored, stdout);
+        ffPrintBuffer(&userNameColored);
+        ffPrintBuffer(&atColored);
+        ffPrintBufferLine(&hostNameColored);
     } else {
         FF_STRBUF_AUTO_DESTROY cwdTilde = ffStrbufCreate();
         if (

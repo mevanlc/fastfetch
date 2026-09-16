@@ -108,7 +108,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         }
 
         ffStrbufTrimRight(&str, ' ');
-        ffStrbufPutTo(&str, stdout);
+        ffPrintBufferLine(&str);
     } else {
         FF_STRBUF_AUTO_DESTROY bytesPercentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

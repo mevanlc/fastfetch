@@ -108,6 +108,8 @@ Fastfetch uses JSONC (JSON with comments) for configuration. [See the Wiki for d
 
 Logos can also be heavily customized; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
 
+The information column wraps automatically to the terminal width. Use `--wrap=off` to opt out or `--wrap=80` to select a total width; see [column wrapping](doc/wrapping.md) for configuration and layout details.
+
 ### WARNING
 
 Fastfetch supports a `Command` module that can run arbitrary shell commands. If you copy-paste a config file from an untrusted source, it may contain malicious commands that can harm your system or compromise your privacy. Please always review the config file before using it.

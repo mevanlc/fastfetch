@@ -14,14 +14,14 @@ bool ffPrintShell(FFShellOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result->prettyName, stdout);
+        ffPrintBuffer(&result->prettyName);
 
         if (result->version.length > 0) {
-            putchar(' ');
-            ffStrbufWriteTo(&result->version, stdout);
+            ffPrintC(' ');
+            ffPrintBuffer(&result->version);
         }
 
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result->processName, "process-name"),

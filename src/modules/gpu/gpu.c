@@ -81,7 +81,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             ffStrbufAppendF(&output, " [%s]", type);
         }
 
-        ffStrbufPutTo(&output, stdout);
+        ffPrintBufferLine(&output);
     } else {
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig, &options->moduleArgs);

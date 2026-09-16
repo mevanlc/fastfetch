@@ -454,6 +454,8 @@ set(LIBFASTFETCH_SRC
     src/common/impl/option.c
     src/common/impl/parsing.c
     src/common/impl/percent.c
+    src/common/impl/output.c
+    src/common/impl/wrap.c
     src/common/impl/printing.c
     src/common/impl/properties.c
     src/common/impl/settings.c
@@ -2162,6 +2164,8 @@ endif()
 ###################
 
 if (BUILD_TESTS)
+    add_executable(fastfetch-test-wrap tests/wrap.c)
+    target_link_libraries(fastfetch-test-wrap PRIVATE libfastfetch)
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2205,6 +2209,12 @@ if (BUILD_TESTS)
     )
 
     enable_testing()
+    add_test(NAME test-wrap COMMAND fastfetch-test-wrap)
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if (Python3_Interpreter_FOUND)
+        add_test(NAME test-wrap-output COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/wrap.py $<TARGET_FILE:fastfetch>)
+        set_tests_properties(test-wrap-output PROPERTIES TIMEOUT 60)
+    endif()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)

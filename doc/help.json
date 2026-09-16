@@ -649,6 +649,16 @@
             }
         },
         {
+            "long": "wrap",
+            "desc": "Wrap the information column (auto, off, or total width in terminal columns)",
+            "remark": "Defaults to auto on terminals. A numeric width also works in pipes and may exceed the physical screen. --disable-linewrap true opts out unless --wrap is explicit.",
+            "arg": {
+                "type": "str",
+                "optional": true,
+                "default": "auto"
+            }
+        },
+        {
             "long": "disable-linewrap",
             "desc": "Specify whether to disable line wrap during execution",
             "arg": {

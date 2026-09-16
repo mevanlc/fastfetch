@@ -1,4 +1,6 @@
 #include "fastfetch.h"
+#include "common/printing.h"
+#include "logo/logo.h"
 #include "common/init.h"
 #include "common/parsing.h"
 #include "common/thread.h"
@@ -26,6 +28,7 @@ static void initState(FFstate* state) {
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
+    state->wrapWidth = state->logoReservedWidth = state->logoTopHeight = 0;
     state->titleFqdn = false;
 
     ffPlatformInit(&state->platform);
@@ -109,6 +112,7 @@ static void exitSignalHandler([[maybe_unused]] int signal) {
 #endif
 
 void ffStart(void) {
+    ffPrintInitFrame();
     ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe;
     ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe;
 
@@ -157,6 +161,7 @@ void ffStart(void) {
 }
 
 void ffFinish(void) {
+    ffPrintEndModule();
     resetConsole();
 }
 
@@ -167,6 +172,8 @@ static void destroyConfig(void) {
 }
 
 static void destroyState(void) {
+    ffPrintDestroy();
+    ffLogoDestroy();
     ffPlatformDestroy(&instance.state.platform);
 }
 

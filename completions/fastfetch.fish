@@ -103,6 +103,8 @@ def main():
                     complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_color)\"")
                 elif arg_type == "command":
                     complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_command)\"")
+                elif long_name == "wrap":
+                    complete_commands.append(f'{command_prefix} -f -a "auto off"')
                 elif arg_type == "config":
                     complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_config)\"")
                 elif arg_type == "enum":

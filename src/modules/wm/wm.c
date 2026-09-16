@@ -26,26 +26,26 @@ bool ffPrintWM(FFWMOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(WM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        ffStrbufWriteTo(&result->wmPrettyName, stdout);
+        ffPrintBuffer(&result->wmPrettyName);
 
         if (version.length > 0) {
-            putchar(' ');
-            ffStrbufWriteTo(&version, stdout);
+            ffPrintC(' ');
+            ffPrintBuffer(&version);
         }
 
         if (result->wmProtocolName.length > 0) {
-            fputs(" (", stdout);
-            ffStrbufWriteTo(&result->wmProtocolName, stdout);
-            putchar(')');
+            ffPrintS(" (");
+            ffPrintBuffer(&result->wmProtocolName);
+            ffPrintC(')');
         }
 
         if (pluginName.length > 0) {
-            fputs(" (with ", stdout);
-            ffStrbufWriteTo(&pluginName, stdout);
-            putchar(')');
+            ffPrintS(" (with ");
+            ffPrintBuffer(&pluginName);
+            ffPrintC(')');
         }
 
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(WM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                        FF_ARG(result->wmProcessName, "process-name"),

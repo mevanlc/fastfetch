@@ -66,7 +66,7 @@ void printSwap(FFSwapOptions* options, uint8_t index, uint32_t totalCount, FFSwa
         }
 
         ffStrbufTrimRight(&str, ' ');
-        ffStrbufPutTo(&str, stdout);
+        ffPrintBufferLine(&str);
     } else {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

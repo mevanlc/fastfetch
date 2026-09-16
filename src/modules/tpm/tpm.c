@@ -19,9 +19,9 @@ bool ffPrintTPM(FFTPMOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.description.length > 0) {
-            ffStrbufPutTo(&result.description, stdout);
+            ffPrintBufferLine(&result.description);
         } else {
-            ffStrbufPutTo(&result.version, stdout);
+            ffPrintBufferLine(&result.version);
         }
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

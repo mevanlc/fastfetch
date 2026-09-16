@@ -90,7 +90,7 @@ bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options) {
 
                 ffTempsAppendNum(dev->temperature, &buffer, options->tempConfig, &options->moduleArgs);
             }
-            ffStrbufPutTo(&buffer, stdout);
+            ffPrintBufferLine(&buffer);
         } else {
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(dev->temperature, &tempStr, options->tempConfig, &options->moduleArgs);

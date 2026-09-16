@@ -27,6 +27,12 @@ typedef struct FFlogo {
 void ffLogoPrint(void);
 void ffLogoPrintChars(const char* data, bool doColorReplacement);
 void ffLogoPrintLine(void);
+void ffLogoPrintLineEnd(uint32_t textWidth);
+void ffLogoPrepareWidth(uint32_t width);
+void ffLogoAppendRight(FFstrbuf* buffer, uint32_t width);
+bool ffLogoObserveSize(uint32_t x, uint32_t y);
+void ffLogoPrintFrame(FFLogoPosition requestedPosition);
+void ffLogoDestroy(void);
 void ffLogoPrintRemaining(void);
 void ffLogoBuiltinPrint(void);
 void ffLogoBuiltinList(void);

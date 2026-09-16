@@ -56,7 +56,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
         }
         ffStrbufTrimRight(&buffer, ' ');
         ffStrbufTrimRight(&buffer, ',');
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
         return true;
     }
 
@@ -137,7 +137,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
                 ffStrbufAppendS(&buffer, " *");
             }
 
-            ffStrbufPutTo(&buffer, stdout);
+            ffPrintBufferLine(&buffer);
             ffStrbufClear(&buffer);
         } else {
             double ppi = inch == 0 ? 0 : sqrt(result->width * result->width + result->height * result->height) / inch;

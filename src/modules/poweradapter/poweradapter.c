@@ -26,9 +26,9 @@ bool ffPrintPowerAdapter(FFPowerAdapterOptions* options) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             if (result->name.length > 0) {
-                puts(result->name.chars);
+                ffPrintLine(result->name.chars);
             } else {
-                printf("%dW\n", result->watts);
+                ffPrintF("%dW\n", result->watts);
             }
         } else {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

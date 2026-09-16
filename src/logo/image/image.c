@@ -1,4 +1,5 @@
 #include "image.h"
+#include "logo/logo.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 #include "common/printing.h"
@@ -54,7 +55,8 @@ static bool printImageIterm(bool printError) {
                 }
                 return false;
             }
-            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;1H", (unsigned) options->paddingTop + 1);
+            ffLogoAppendRight(&buf, options->width);
         }
         if (inTmux) {
             ffStrbufAppendS(&buf, "\ePtmux;\e");
@@ -84,7 +86,9 @@ static bool printImageIterm(bool printError) {
                 instance.state.logoWidth = X + options->paddingRight - 1;
             }
             instance.state.logoHeight = Y;
-            fputs("\e[H", stdout);
+            if (!ffLogoObserveSize(X, Y)) {
+                fputs("\e[H", stdout);
+            }
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
@@ -92,7 +96,7 @@ static bool printImageIterm(bool printError) {
     } else {
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
         if (options->position == FF_LOGO_POSITION_RIGHT) {
-            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+            ffLogoAppendRight(&buf, options->width);
         } else if (options->paddingLeft) {
             ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
         }
@@ -111,9 +115,11 @@ static bool printImageIterm(bool printError) {
             ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffStrbufAppendNC(&buf, options->paddingRight, '\n');
+            instance.state.logoTopHeight = options->paddingTop + options->height + (instance.state.wrapWidth ? options->paddingBottom : options->paddingRight);
+            ffStrbufAppendNC(&buf, instance.state.wrapWidth ? options->paddingBottom : options->paddingRight, '\n');
         } else if (options->position == FF_LOGO_POSITION_RIGHT) {
-            instance.state.logoWidth = instance.state.logoHeight = 0;
+            instance.state.logoWidth = 0;
+            instance.state.logoHeight = instance.state.wrapWidth ? options->paddingTop + options->height : 0;
             ffStrbufAppendF(&buf, "\e[1G\e[%uA", (unsigned) options->height);
         }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
@@ -233,15 +239,8 @@ static bool printImageKittyIcat(bool printError) {
     if (options->position == FF_LOGO_POSITION_LEFT) {
         ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH", (unsigned) options->paddingTop + 1, (unsigned) options->paddingLeft + 1);
     } else if (options->position == FF_LOGO_POSITION_TOP) {
-        if (!options->width) {
-            ffStrbufAppendNC(&buf, options->paddingTop, '\n');
-            ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
-        } else {
-            if (printError) {
-                fputs("Logo (kitty-icat): position top is not supported when logo width is set\n", stderr);
-            }
-            return false;
-        }
+        ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+        ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
     } else if (options->position == FF_LOGO_POSITION_RIGHT) {
         if (printError) {
             fputs("Logo (kitty-icat): position right is not supported\n", stderr);
@@ -255,7 +254,30 @@ static bool printImageKittyIcat(bool printError) {
 
     const char* error = nullptr;
 
-    if (options->width) {
+    bool naturalTop = options->position == FF_LOGO_POSITION_TOP && options->width && !options->height;
+    if (naturalTop) {
+        // --place leaves the cursor at the image's top. Give icat a virtual viewport
+        // of the requested width instead, so it scales and advances past the image.
+        FFTerminalSizeResult size = {};
+        if (!ffDetectTerminalSize(&size) || !size.columns || !size.rows || !size.width || !size.height) {
+            if (printError) {
+                fputs("Logo (kitty-icat): Cannot measure cell size; specify logo height for position top\n", stderr);
+            }
+            return false;
+        }
+        char viewport[128];
+        snprintf(viewport, sizeof(viewport), "--use-window-size=%u,%u,%llu,%u", options->width, (unsigned) size.rows, (unsigned long long) size.width * options->width / size.columns, (unsigned) size.height);
+        error = ffProcessAppendStdOut(&icatOutput, (char*[]) {
+                                                       "kitten",
+                                                       "icat",
+                                                       "--stdin=no",
+                                                       "--align=left",
+                                                       "--scale-up",
+                                                       viewport,
+                                                       options->source.chars,
+                                                       nullptr,
+                                                   });
+    } else if (options->width) {
         // `--place` measures `left` and `top` from the top left corner of the screen, so the padding is
         // passed through unchanged. The move `kitten` writes for it is dropped again in appendIcatOutput,
         // which leaves the position to the caller, so this is not what puts the image at the padding in
@@ -325,10 +347,20 @@ static bool printImageKittyIcat(bool printError) {
             instance.state.logoWidth = X + options->paddingRight - 1;
         }
         instance.state.logoHeight = Y;
-        fputs("\e[H", stdout);
+        if (!ffLogoObserveSize(X, Y)) {
+            fputs("\e[H", stdout);
+        }
     } else if (options->position == FF_LOGO_POSITION_TOP) {
         instance.state.logoWidth = instance.state.logoHeight = 0;
-        ffPrintCharTimes('\n', options->paddingRight);
+        if (options->width && options->height) {
+            instance.state.logoTopHeight = options->paddingTop + options->height + options->paddingBottom;
+            // --place leaves the cursor at the top of the image. Move relative to
+            // that position, since a static invocation need not start at screen row 1.
+            fputs("\r", stdout);
+            ffPrintCharTimes('\n', options->height + options->paddingBottom);
+        } else {
+            ffPrintCharTimes('\n', naturalTop || instance.state.wrapWidth ? options->paddingBottom : options->paddingRight);
+        }
     }
 
     return true;
@@ -369,7 +401,8 @@ static bool printImageKittyDirect(bool printError) {
                 }
                 return false;
             }
-            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;1H", (unsigned) options->paddingTop + 1);
+            ffLogoAppendRight(&buf, options->width);
         }
 
         if (inTmux) {
@@ -406,7 +439,9 @@ static bool printImageKittyDirect(bool printError) {
                 instance.state.logoWidth = X + options->paddingRight - 1;
             }
             instance.state.logoHeight = Y;
-            fputs("\e[H", stdout);
+            if (!ffLogoObserveSize(X, Y)) {
+                fputs("\e[H", stdout);
+            }
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
@@ -415,7 +450,7 @@ static bool printImageKittyDirect(bool printError) {
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
 
         if (options->position == FF_LOGO_POSITION_RIGHT) {
-            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+            ffLogoAppendRight(&buf, options->width);
         } else if (options->paddingLeft) {
             ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
         }
@@ -435,9 +470,11 @@ static bool printImageKittyDirect(bool printError) {
             ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffStrbufAppendNC(&buf, options->paddingRight, '\n');
+            instance.state.logoTopHeight = options->paddingTop + options->height + (instance.state.wrapWidth ? options->paddingBottom : options->paddingRight);
+            ffStrbufAppendNC(&buf, instance.state.wrapWidth ? options->paddingBottom : options->paddingRight, '\n');
         } else if (options->position == FF_LOGO_POSITION_RIGHT) {
-            instance.state.logoWidth = instance.state.logoHeight = 0;
+            instance.state.logoWidth = 0;
+            instance.state.logoHeight = instance.state.wrapWidth ? options->paddingTop + options->height : 0;
             ffStrbufAppendF(&buf, "\e[1G\e[%uA", (unsigned) options->height);
         }
 
@@ -524,6 +561,7 @@ static void writeCacheData(FFLogoRequestData* requestData, const void* value, si
 }
 
 static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName) {
+    ffLogoPrepareWidth(requestData->logoCharacterWidth);
     const FFOptionsLogo* options = &instance.config.logo;
     // Calculate character dimensions
     instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
@@ -543,7 +581,9 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     // Write result to stdout
     ffPrintCharTimes('\n', options->paddingTop);
     if (options->position == FF_LOGO_POSITION_RIGHT) {
-        printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
+        FF_STRBUF_AUTO_DESTROY position = ffStrbufCreate();
+        ffLogoAppendRight(&position, requestData->logoCharacterWidth);
+        ffStrbufWriteTo(&position, stdout);
     } else if (options->paddingLeft) {
         printf("\e[%uC", (unsigned) options->paddingLeft);
     }
@@ -555,8 +595,18 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
         printf("\e[1G\e[%uA", instance.state.logoHeight);
     }
 
-    if (options->position != FF_LOGO_POSITION_LEFT) {
+    if (options->position == FF_LOGO_POSITION_TOP) {
+        instance.state.logoTopHeight = options->paddingTop + requestData->logoCharacterHeight + options->paddingBottom;
         instance.state.logoWidth = instance.state.logoHeight = 0;
+        if (instance.state.wrapWidth) {
+            fputs("\r\n", stdout);
+            ffPrintCharTimes('\n', options->paddingBottom);
+        }
+    } else if (options->position == FF_LOGO_POSITION_RIGHT) {
+        instance.state.logoWidth = 0;
+        if (!instance.state.wrapWidth) {
+            instance.state.logoHeight = 0;
+        }
     }
 }
 
@@ -900,9 +950,12 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
         return false;
     }
 
+    ffLogoPrepareWidth(requestData->logoCharacterWidth);
     ffPrintCharTimes('\n', options->paddingTop);
     if (options->position == FF_LOGO_POSITION_RIGHT) {
-        printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
+        FF_STRBUF_AUTO_DESTROY position = ffStrbufCreate();
+        ffLogoAppendRight(&position, requestData->logoCharacterWidth);
+        ffStrbufWriteTo(&position, stdout);
     } else if (options->paddingLeft) {
         printf("\e[%uC", (unsigned) options->paddingLeft);
     }
@@ -934,14 +987,27 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
 
     instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
     instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
+    if (instance.state.wrapWidth && instance.state.logoHeight) {
+        --instance.state.logoHeight; // The graphics cursor is on the last image row.
+    }
 
     if (options->position != FF_LOGO_POSITION_TOP) {
         // Go to upper left corner
         printf("\e[1G\e[%uA", instance.state.logoHeight);
     }
 
-    if (options->position != FF_LOGO_POSITION_LEFT) {
+    if (options->position == FF_LOGO_POSITION_TOP) {
+        instance.state.logoTopHeight = options->paddingTop + requestData->logoCharacterHeight + options->paddingBottom;
         instance.state.logoWidth = instance.state.logoHeight = 0;
+        if (instance.state.wrapWidth) {
+            fputs("\r\n", stdout);
+            ffPrintCharTimes('\n', options->paddingBottom);
+        }
+    } else if (options->position == FF_LOGO_POSITION_RIGHT) {
+        instance.state.logoWidth = 0;
+        if (!instance.state.wrapWidth) {
+            instance.state.logoHeight = 0;
+        }
     }
     return true;
 }
@@ -1083,6 +1149,9 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
 #endif // FF_HAVE_IMAGEMAGICK{6, 7}
 
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
+    if (instance.config.logo.width) {
+        ffLogoPrepareWidth(instance.config.logo.width);
+    }
     if (instance.config.display.pipe) {
         if (printError) {
             fputs("Logo: Image logo is not supported in pipe mode\n", stderr);

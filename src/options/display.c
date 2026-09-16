@@ -101,6 +101,32 @@ error:
     exit(477);
 }
 
+static bool parseWrap(const char* value, int64_t* result) {
+    if (!value || ffStrEqualsIgnCase(value, "auto")) {
+        *result = 0;
+        return true;
+    }
+    if (ffStrEqualsIgnCase(value, "off")) {
+        *result = -1;
+        return true;
+    }
+    uint64_t width = 0;
+    for (const char* p = value; *p; ++p) {
+        if (*p < '0' || *p > '9') {
+            return false;
+        }
+        width = width * 10 + (unsigned) (*p - '0');
+        if (width > UINT32_MAX) {
+            return false;
+        }
+    }
+    if (!width) {
+        return false;
+    }
+    *result = (int64_t) width;
+    return true;
+}
+
 const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "display");
     if (!object) {
@@ -132,6 +158,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             options->pipe = yyjson_get_bool(val);
         } else if (unsafe_yyjson_equals_str(key, "showErrors")) {
             options->showErrors = yyjson_get_bool(val);
+        } else if (unsafe_yyjson_equals_str(key, "wrap")) {
+            if (yyjson_is_uint(val) && yyjson_get_uint(val) > 0 && yyjson_get_uint(val) <= UINT32_MAX) {
+                options->wrap = (int64_t) yyjson_get_uint(val);
+            } else if (!yyjson_is_str(val) ||
+                !(unsafe_yyjson_equals_str(val, "auto") || unsafe_yyjson_equals_str(val, "off")) ||
+                !parseWrap(yyjson_get_str(val), &options->wrap)) {
+                return "display.wrap must be auto, off, or an integer between 1 and 4294967295";
+            }
+            options->wrapExplicit = true;
         } else if (unsafe_yyjson_equals_str(key, "disableLinewrap")) {
             options->disableLinewrap = yyjson_get_bool(val);
         } else if (unsafe_yyjson_equals_str(key, "hideCursor")) {
@@ -717,7 +752,13 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         exit(477);
     }
 #endif
-    else if (ffStrEqualsIgnCase(key, "--disable-linewrap")) {
+    else if (ffStrEqualsIgnCase(key, "--wrap")) {
+        if (!parseWrap(value, &options->wrap)) {
+            fputs("Error: --wrap expects auto, off, or an integer between 1 and 4294967295\n", stderr);
+            exit(400);
+        }
+        options->wrapExplicit = true;
+    } else if (ffStrEqualsIgnCase(key, "--disable-linewrap")) {
         options->disableLinewrap = ffOptionParseBoolean(value);
     } else if (ffStrEqualsIgnCase(key, "--hide-cursor")) {
         options->hideCursor = ffOptionParseBoolean(value);
@@ -954,6 +995,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->showErrors = false;
     options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
     options->disableLinewrap = false;
+    options->wrap = 0;
+    options->wrapExplicit = false;
 
 #ifndef NDEBUG
     options->debugMode = !!getenv("FF_DEBUG");
@@ -1051,6 +1094,13 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
     yyjson_mut_obj_add_bool(doc, obj, "showErrors", options->showErrors);
 
     yyjson_mut_obj_add_bool(doc, obj, "disableLinewrap", options->disableLinewrap);
+    if (options->wrapExplicit) {
+        if (options->wrap > 0) {
+            yyjson_mut_obj_add_uint(doc, obj, "wrap", (uint64_t) options->wrap);
+        } else {
+            yyjson_mut_obj_add_str(doc, obj, "wrap", options->wrap < 0 ? "off" : "auto");
+        }
+    }
 
     yyjson_mut_obj_add_bool(doc, obj, "hideCursor", options->hideCursor);
 

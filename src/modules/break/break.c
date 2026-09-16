@@ -3,8 +3,8 @@
 #include "modules/break/break.h"
 
 bool ffPrintBreak([[maybe_unused]] FFBreakOptions* options) {
-    ffLogoPrintLine();
-    putchar('\n');
+    ffPrintBeginLine();
+    ffPrintC('\n');
     return true;
 }
 

@@ -42,7 +42,7 @@ bool ffPrintDNS(FFDNSOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        ffStrbufPutTo(&buf, stdout);
+        ffPrintBufferLine(&buf);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                         FF_ARG(buf, "result"),

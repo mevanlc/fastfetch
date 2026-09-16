@@ -116,7 +116,7 @@ bool ffPrintDateTime(FFDateTimeOptions* options) {
 
     ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(DateTime), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-    puts(buffer);
+    ffPrintLine(buffer);
     return true;
 }
 

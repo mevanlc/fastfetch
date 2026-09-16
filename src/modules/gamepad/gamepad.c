@@ -28,7 +28,7 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
             }
             ffPercentAppendNum(&buffer, device->battery, options->percent, buffer.length > 0, &options->moduleArgs);
         }
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

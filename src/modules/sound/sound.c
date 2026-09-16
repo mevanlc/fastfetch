@@ -39,7 +39,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
             }
         }
 
-        ffStrbufPutTo(&str, stdout);
+        ffPrintBufferLine(&str);
     } else {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();

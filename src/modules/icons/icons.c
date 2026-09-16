@@ -20,15 +20,15 @@ bool ffPrintIcons(FFIconsOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Icons), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.icons1.length) {
-            ffStrbufWriteTo(&result.icons1, stdout);
+            ffPrintBuffer(&result.icons1);
         }
         if (result.icons2.length) {
             if (result.icons1.length) {
-                fputs(", ", stdout);
+                ffPrintS(", ");
             }
-            ffStrbufWriteTo(&result.icons2, stdout);
+            ffPrintBuffer(&result.icons2);
         }
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Icons), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result.icons1, "icons1"),

@@ -24,11 +24,11 @@ bool ffPrintLM(FFLMOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result.prettyName, stdout);
+        ffPrintBuffer(&result.prettyName);
         if (result.version.length) {
-            printf(" %s", result.version.chars);
+            ffPrintF(" %s", result.version.chars);
         }
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                        FF_ARG(result.service, "service"),

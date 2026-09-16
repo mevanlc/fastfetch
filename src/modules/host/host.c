@@ -41,7 +41,7 @@ bool ffPrintHost(FFHostOptions* options) {
             ffStrbufAppendF(&output, " (%s)", host.version.chars);
         }
 
-        ffStrbufPutTo(&output, stdout);
+        ffPrintBufferLine(&output);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Host), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                          FF_ARG(host.family, "family"),

@@ -73,7 +73,7 @@ bool ffPrintCPUUsage(FFCPUUsageOptions* options) {
                 ffPercentAppendNum(&str, *percent, options->percent, false, &options->moduleArgs);
             }
         }
-        ffStrbufPutTo(&str, stdout);
+        ffPrintBufferLine(&str);
     } else {
         FF_STRBUF_AUTO_DESTROY avgNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

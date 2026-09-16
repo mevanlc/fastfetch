@@ -37,7 +37,7 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
                 ffStrbufAppendF(&output, " - THR %u", process->threads);
             }
         }
-        ffStrbufPutTo(&output, stdout);
+        ffPrintBufferLine(&output);
     } else {
         FF_STRBUF_AUTO_DESTROY cpuFormatted = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
@@ -83,11 +83,11 @@ bool ffPrintTop(FFTopOptions* options) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Top), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_LIST_FOR_EACH (FFTopProcessResult, process, results) {
             if ((void*) process != results.data) {
-                putchar(' ');
+                ffPrintC(' ');
             }
-            ffStrbufWriteTo(&process->name, stdout);
+            ffPrintBuffer(&process->name);
         }
-        putchar('\n');
+        ffPrintC('\n');
     }
 
     FF_LIST_FOR_EACH (FFTopProcessResult, item, results) {

@@ -4,7 +4,7 @@
 #include "logo/logo.h"
 
 void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType) {
-    ffLogoPrintLine();
+    ffPrintBeginLine();
 
     // This is used by --set-keyless, in this case we want neither the module name nor the separator
     if (moduleName == nullptr) {
@@ -16,9 +16,9 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         ffPrintCharTimes(' ', instance.config.display.keyPaddingLeft);
 
         if (!instance.config.display.pipe) {
-            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+            ffPrintS(FASTFETCH_TEXT_MODIFIER_RESET);
             if (instance.config.display.brightColor) {
-                fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+                ffPrintS(FASTFETCH_TEXT_MODIFIER_BOLT);
             }
 
             if (moduleArgs && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_COLOR) && moduleArgs->keyColor.length > 0) {
@@ -29,7 +29,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         }
 
         if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_ICON && moduleArgs && moduleArgs->keyIcon.length > 0) {
-            ffStrbufWriteTo(&moduleArgs->keyIcon, stdout);
+            ffPrintBuffer(&moduleArgs->keyIcon);
         }
 
         if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_STRING) {
@@ -37,10 +37,10 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
 
             // nullptr check is required for modules with custom keys, e.g. disk with the folder path
             if ((printType & FF_PRINT_TYPE_NO_CUSTOM_KEY) || !moduleArgs || moduleArgs->key.length == 0) {
-                fputs(moduleName, stdout);
+                ffPrintS(moduleName);
 
                 if (moduleIndex > 0) {
-                    printf(" %hhu", moduleIndex);
+                    ffPrintF(" %hhu", moduleIndex);
                 }
             } else {
                 FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -49,31 +49,31 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
                                                                            FF_ARG(moduleArgs->keyIcon, "icon"),
                                                                            FF_ARG(moduleName, "module-name"),
                                                                        }));
-                ffStrbufWriteTo(&key, stdout);
+                ffPrintBuffer(&key);
             }
         }
 
         if (!instance.config.display.pipe) {
-            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+            ffPrintS(FASTFETCH_TEXT_MODIFIER_RESET);
             ffPrintColor(&instance.config.display.colorSeparator);
         }
 
-        ffStrbufWriteTo(&instance.config.display.keyValueSeparator, stdout);
+        ffPrintBuffer(&instance.config.display.keyValueSeparator);
 
         if (!instance.config.display.pipe && instance.config.display.colorSeparator.length) {
-            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+            ffPrintS(FASTFETCH_TEXT_MODIFIER_RESET);
         }
 
         if (!(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH)) {
             uint32_t keyWidth = moduleArgs && moduleArgs->keyWidth > 0 ? moduleArgs->keyWidth : instance.config.display.keyWidth;
             if (keyWidth > 0) {
-                printf("\e[%uG", (unsigned) (keyWidth + instance.state.logoWidth));
+                ffPrintKeyWidth(keyWidth);
             }
         }
     }
 
     if (!instance.config.display.pipe) {
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+        ffPrintS(FASTFETCH_TEXT_MODIFIER_RESET);
         if (moduleArgs && moduleArgs->outputColor.length) {
             ffPrintColor(&moduleArgs->outputColor);
         } else if (instance.config.display.colorOutput.length) {
@@ -94,7 +94,7 @@ bool ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
 
     if (success) {
         ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         ffPrintError(moduleName, moduleIndex, moduleArgs, printType, "%s", buffer.chars);
     }
@@ -110,19 +110,19 @@ void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArg
     ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
 
     if (!instance.config.display.pipe) {
-        fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
+        ffPrintS(FASTFETCH_TEXT_MODIFIER_ERROR);
     }
 
     va_list arguments;
     va_start(arguments, message);
-    vprintf(message, arguments);
+    ffPrintVF(message, arguments);
     va_end(arguments);
 
     if (!instance.config.display.pipe) {
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+        ffPrintS(FASTFETCH_TEXT_MODIFIER_RESET);
     }
 
-    putchar('\n');
+    ffPrintC('\n');
 }
 
 void ffPrintColor(const FFstrbuf* colorValue) {
@@ -132,7 +132,7 @@ void ffPrintColor(const FFstrbuf* colorValue) {
         return;
     }
 
-    printf("\e[%sm", colorValue->chars);
+    ffPrintF("\e[%sm", colorValue->chars);
 }
 
 void ffPrintCharTimes(char c, uint32_t times) {
@@ -141,17 +141,17 @@ void ffPrintCharTimes(char c, uint32_t times) {
     }
 
     if (times == 1) {
-        putchar(c);
+        ffPrintC(c);
         return;
     }
 
     char str[32];
     memset(str, c, sizeof(str)); // 2 instructions when compiling with AVX2 enabled
     for (uint32_t i = sizeof(str); i <= times; i += (uint32_t) sizeof(str)) {
-        fwrite(str, 1, sizeof(str), stdout);
+        ffPrintWrite(str, sizeof(str));
     }
     uint32_t remaining = times % sizeof(str);
     if (remaining > 0) {
-        fwrite(str, 1, remaining, stdout);
+        ffPrintWrite(str, remaining);
     }
 }

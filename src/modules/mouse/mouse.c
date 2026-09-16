@@ -8,7 +8,7 @@
 static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, uint8_t index) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Mouse), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&device->name, stdout);
+        ffPrintBufferLine(&device->name);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Mouse), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(device->name, "name"),

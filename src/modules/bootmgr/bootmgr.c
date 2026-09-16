@@ -26,11 +26,11 @@ bool ffPrintBootmgr(FFBootmgrOptions* options) {
 
         if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Bootmgr), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            ffStrbufWriteTo(&bootmgr.name, stdout);
+            ffPrintBuffer(&bootmgr.name);
             if (firmwareName.length > 0) {
-                printf(" - %s\n", firmwareName.chars);
+                ffPrintF(" - %s\n", firmwareName.chars);
             } else {
-                putchar('\n');
+                ffPrintC('\n');
             }
         } else {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Bootmgr), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

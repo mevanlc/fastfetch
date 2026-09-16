@@ -53,7 +53,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
         if (result->readOnly) {
             ffStrbufAppendS(&buffer, " [Read-only]");
         }
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         FF_STRBUF_AUTO_DESTROY usedPercentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

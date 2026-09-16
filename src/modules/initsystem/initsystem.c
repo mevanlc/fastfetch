@@ -22,11 +22,11 @@ bool ffPrintInitSystem(FFInitSystemOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(InitSystem), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result.name, stdout);
+        ffPrintBuffer(&result.name);
         if (result.version.length) {
-            printf(" %s\n", result.version.chars);
+            ffPrintF(" %s\n", result.version.chars);
         } else {
-            putchar('\n');
+            ffPrintC('\n');
         }
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(InitSystem), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

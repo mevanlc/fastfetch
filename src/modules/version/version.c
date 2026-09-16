@@ -10,7 +10,7 @@ bool ffPrintVersion(FFVersionOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Version), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
+        ffPrintF("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
     } else {
         FFLibcResult libcResult;
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();

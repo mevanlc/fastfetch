@@ -19,7 +19,7 @@ bool ffPrintFont(FFFontOptions* options) {
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Font), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            ffStrbufPutTo(&font.display, stdout);
+            ffPrintBufferLine(&font.display);
         } else {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Font), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                              FF_ARG(font.fonts[0], "font1"),

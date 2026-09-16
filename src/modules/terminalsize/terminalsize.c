@@ -14,13 +14,13 @@ bool ffPrintTerminalSize(FFTerminalSizeOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        printf("%u columns x %u rows", result.columns, result.rows);
+        ffPrintF("%u columns x %u rows", result.columns, result.rows);
 
         if (result.width != 0 && result.height != 0) {
-            printf(" (%upx x %upx)", result.width, result.height);
+            ffPrintF(" (%upx x %upx)", result.width, result.height);
         }
 
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                   FF_ARG(result.rows, "rows"),

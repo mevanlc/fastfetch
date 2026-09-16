@@ -113,8 +113,8 @@ bool ffPrintMedia(FFMediaOptions* options) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Media), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if (artistPretty.length > 0) {
-            ffStrbufWriteTo(&artistPretty, stdout);
-            fputs(" - ", stdout);
+            ffPrintBuffer(&artistPretty);
+            ffPrintS(" - ");
         }
 
         if (media->length > 0) {
@@ -146,7 +146,7 @@ bool ffPrintMedia(FFMediaOptions* options) {
             ffStrbufAppendF(&songPretty, " [%s]", media->status.chars);
         }
 
-        ffStrbufPutTo(&songPretty, stdout);
+        ffPrintBufferLine(&songPretty);
     } else {
         FF_STRBUF_AUTO_DESTROY progress = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();

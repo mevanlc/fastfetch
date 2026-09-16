@@ -96,7 +96,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             ffTempsAppendNum(result->temperature, &str, options->tempConfig, &options->moduleArgs);
         }
 
-        ffStrbufPutTo(&str, stdout);
+        ffPrintBufferLine(&str);
     } else {
         uint32_t timeRemaining = result->timeRemaining < 0 ? 0 : (uint32_t) result->timeRemaining;
         uint32_t seconds = timeRemaining % 60;

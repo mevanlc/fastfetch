@@ -31,6 +31,9 @@ typedef struct FFstate {
     uint32_t logoWidth;
     uint32_t logoHeight;
     uint32_t keysHeight;
+    uint32_t wrapWidth;
+    uint32_t logoReservedWidth; // occupied side-logo width, including both paddings
+    uint32_t logoTopHeight;
     bool titleFqdn;
     uint32_t dynamicInterval;
     FFPlatform platform;

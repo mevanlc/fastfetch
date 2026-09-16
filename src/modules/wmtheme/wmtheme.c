@@ -13,7 +13,7 @@ bool ffPrintWMTheme(FFWMThemeOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(WMTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        puts(themeOrError.chars);
+        ffPrintLine(themeOrError.chars);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(WMTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                              FF_ARG(themeOrError, "result"),

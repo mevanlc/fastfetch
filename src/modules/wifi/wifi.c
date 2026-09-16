@@ -84,7 +84,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
             } else {
                 ffStrbufAppend(&buffer, &item->inf.status);
             }
-            ffStrbufPutTo(&buffer, stdout);
+            ffPrintBufferLine(&buffer);
         } else {
             FF_STRBUF_AUTO_DESTROY percentNum = ffStrbufCreate();
             if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

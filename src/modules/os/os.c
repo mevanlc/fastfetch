@@ -83,7 +83,7 @@ bool ffPrintOS(FFOSOptions* options) {
         }
 
         ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
-        ffStrbufPutTo(&result, stdout);
+        ffPrintBufferLine(&result);
     } else {
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                      FF_ARG(instance.state.platform.sysinfo.name, "sysname"),

@@ -24,7 +24,7 @@ bool ffPrintCommand(FFCommandOptions* options) {
         while (ffStrbufGetline(&line, &len, &result)) {
             if (options->moduleArgs.outputFormat.length == 0) {
                 ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Command), ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-                puts(line);
+                ffPrintLine(line);
             } else {
                 FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Command), ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(line, "result") }));
             }
@@ -32,7 +32,7 @@ bool ffPrintCommand(FFCommandOptions* options) {
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            ffStrbufPutTo(&result, stdout);
+            ffPrintBufferLine(&result);
         } else {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result, "result") }));
         }

@@ -16,9 +16,9 @@ bool ffPrintTerminal(FFTerminalOptions* options) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Terminal), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if (result->version.length) {
-            printf("%s %s\n", result->prettyName.chars, result->version.chars);
+            ffPrintF("%s %s\n", result->prettyName.chars, result->version.chars);
         } else {
-            ffStrbufPutTo(&result->prettyName, stdout);
+            ffPrintBufferLine(&result->prettyName);
         }
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Terminal), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {

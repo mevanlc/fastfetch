@@ -16,14 +16,7 @@ bool ffPrintTerminalTheme(FFTerminalThemeOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TerminalTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        printf("#%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (FG) - #%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (BG) [%s]\n",
-            result.fg.r,
-            result.fg.g,
-            result.fg.b,
-            result.bg.r,
-            result.bg.g,
-            result.bg.b,
-            result.bg.dark ? "Dark" : "Light");
+        ffPrintF("#%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (FG) - #%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (BG) [%s]\n", result.fg.r, result.fg.g, result.fg.b, result.bg.r, result.bg.g, result.bg.b, result.bg.dark ? "Dark" : "Light");
     } else {
         char fg[32], bg[32];
         const char* fgType = result.fg.dark ? "Dark" : "Light";

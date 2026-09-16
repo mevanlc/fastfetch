@@ -23,14 +23,14 @@ bool ffPrintEditor(FFEditorOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.exe.length) {
-            ffStrbufWriteTo(&result.exe, stdout);
+            ffPrintBuffer(&result.exe);
             if (result.version.length) {
-                printf(" %s", result.version.chars);
+                ffPrintF(" %s", result.version.chars);
             }
         } else {
-            ffStrbufWriteTo(&result.name, stdout);
+            ffPrintBuffer(&result.name);
         }
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(result.type, "type"),

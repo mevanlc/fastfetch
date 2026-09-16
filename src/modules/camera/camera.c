@@ -7,16 +7,16 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Camera), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        ffStrbufWriteTo(&device->name, stdout);
+        ffPrintBuffer(&device->name);
         if (device->colorspace.length > 0) {
-            fputs(" - ", stdout);
-            ffStrbufWriteTo(&device->colorspace, stdout);
+            ffPrintS(" - ");
+            ffPrintBuffer(&device->colorspace);
         }
 
         if (device->width > 0 && device->height > 0) {
-            printf(" (%ux%u px)\n", (unsigned) device->width, (unsigned) device->height);
+            ffPrintF(" (%ux%u px)\n", (unsigned) device->width, (unsigned) device->height);
         } else {
-            putchar('\n');
+            ffPrintC('\n');
         }
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Camera), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (((FFformatarg[]) {

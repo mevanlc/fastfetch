@@ -18,7 +18,7 @@ bool ffPrintLoadavg(FFLoadavgOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         if (options->compact) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Loadavg), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            printf("%.*f, %.*f, %.*f\n", options->ndigits, result[0], options->ndigits, result[1], options->ndigits, result[2]);
+            ffPrintF("%.*f, %.*f, %.*f\n", options->ndigits, result[0], options->ndigits, result[1], options->ndigits, result[2]);
         } else {
             FFCPUResult cpu = {
                 .temperature = FF_CPU_TEMP_UNSET,
@@ -69,7 +69,7 @@ bool ffPrintLoadavg(FFLoadavgOptions* options) {
                     ffPercentAppendNum(&buffer, percent, options->percent, buffer.length > 0, &options->moduleArgs);
                 }
 
-                ffStrbufPutTo(&buffer, stdout);
+                ffPrintBufferLine(&buffer);
             }
         }
     } else {

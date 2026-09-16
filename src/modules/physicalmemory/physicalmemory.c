@@ -31,31 +31,31 @@ bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), result.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             if (device->installed) {
-                fputs(prettySize.chars, stdout);
-                fputs(" - ", stdout);
-                ffStrbufWriteTo(&device->type, stdout);
+                ffPrintS(prettySize.chars);
+                ffPrintS(" - ");
+                ffPrintBuffer(&device->type);
                 if (device->maxSpeed > 0) {
-                    printf("-%u", device->maxSpeed);
+                    ffPrintF("-%u", device->maxSpeed);
                 }
                 if (device->runningSpeed > 0 && device->runningSpeed != device->maxSpeed) {
-                    printf(" @ %u MT/s", device->runningSpeed);
+                    ffPrintF(" @ %u MT/s", device->runningSpeed);
                 }
                 if (device->vendor.length > 0) {
-                    printf(" (%s)", device->vendor.chars);
+                    ffPrintF(" (%s)", device->vendor.chars);
                 }
                 if (device->ecc) {
-                    fputs(" - ECC", stdout);
+                    ffPrintS(" - ECC");
                 }
             } else {
-                fputs("Empty", stdout);
+                ffPrintS("Empty");
                 if (device->formFactor.length > 0) {
-                    printf(" - %s", device->formFactor.chars);
+                    ffPrintF(" - %s", device->formFactor.chars);
                 }
                 if (device->locator.length > 0) {
-                    printf(" (%s)", device->locator.chars);
+                    ffPrintF(" (%s)", device->locator.chars);
                 }
             }
-            putchar('\n');
+            ffPrintC('\n');
         } else {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                                         FF_ARG(device->size, "bytes"),

@@ -48,6 +48,9 @@ typedef struct FFOptionsDisplay {
     bool debugMode;
 #endif
     bool disableLinewrap;
+    // -1: off, 0: auto, positive: explicit total width in terminal cells.
+    int64_t wrap;
+    bool wrapExplicit;
     bool durationAbbreviation;
     FFSpaceBeforeUnitType durationSpaceBeforeUnit;
     bool hideCursor;

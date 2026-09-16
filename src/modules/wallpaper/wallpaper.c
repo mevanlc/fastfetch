@@ -27,7 +27,7 @@ bool ffPrintWallpaper(FFWallpaperOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Wallpaper), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        puts(filename);
+        ffPrintLine(filename);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Wallpaper), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(filename, "file-name"),

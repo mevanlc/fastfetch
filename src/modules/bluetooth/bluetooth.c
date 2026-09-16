@@ -33,7 +33,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
             ffStrbufAppendS(&buffer, " [disconnected]");
         }
 
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

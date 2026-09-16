@@ -9,6 +9,7 @@
 #include "common/jsonconfig.h"
 #include "common/time.h"
 #include "common/strutil.h"
+#include "common/printing.h"
 #include "common/mallocHelper.h"
 #include "fastfetch_datatext.h"
 
@@ -765,6 +766,12 @@ static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(F
             exit(400);
         }
 
+        if (ffStrStartsWithIgnCase(key, "--wrap=")) {
+            char wrapKey[] = "--wrap";
+            parser(data, wrapKey, argv[i] + 7);
+            continue;
+        }
+
         if (i == argc - 1 || (argv[i + 1][0] == '-' && argv[i + 1][1] != '\0' &&    // `-` is used as an alias for `/dev/stdin`
                                  !ffStrEqualsIgnCase(argv[i], "--separator-string") // Separator string can start with a -
                                  )) {
@@ -791,6 +798,8 @@ static void run(FFdata* data) {
 
     ffStart();
 
+    const FFLogoPosition requestedLogoPosition = instance.config.logo.position;
+
     if (!data->resultDoc) {
         ffLogoPrint();
     }
@@ -813,8 +822,11 @@ static void run(FFdata* data) {
             fputs("\e[J", stdout); // Clear from cursor to the end of the screen to prevent artifacts when the new output is shorter than the previous one
             fflush(stdout);
             ffTimeSleep(instance.state.dynamicInterval);
-            fputs("\e[H", stdout); // Move cursor to the top left corner to overwrite the previous output
+            ffPrintInitFrame();
+            fputs("\e[H\e[2J", stdout);    // Redraw the complete frame, including logos that moved.
+            fflush(stdout);                // Image and top-logo backends may write directly to the descriptor.
             instance.state.keysHeight = 0; // Reset keysHeight so `ffLogoPrintRemaining` will recalculate it
+            ffLogoPrintFrame(requestedLogoPosition);
         } else {
             break;
         }
@@ -856,6 +868,14 @@ static void writeConfigFile(FFdata* data) {
             yyjson_mut_val* logo = yyjson_mut_obj(doc);
             yyjson_mut_obj_add_str(doc, logo, "type", "small");
             yyjson_mut_obj_add_val(doc, root, "logo", logo);
+        }
+    }
+    if (instance.config.display.wrapExplicit && data->docType != FF_RESULT_DOC_TYPE_CONFIG_FULL) {
+        yyjson_mut_val* display = yyjson_mut_obj_add_obj(doc, root, "display");
+        if (instance.config.display.wrap > 0) {
+            yyjson_mut_obj_add_uint(doc, display, "wrap", (uint64_t) instance.config.display.wrap);
+        } else {
+            yyjson_mut_obj_add_str(doc, display, "wrap", instance.config.display.wrap < 0 ? "off" : "auto");
         }
     }
     ffMigrateCommandOptionToJsonc(data);

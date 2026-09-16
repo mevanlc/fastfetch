@@ -6,7 +6,8 @@
 #include "modules/separator/separator.h"
 
 bool ffPrintSeparator(FFSeparatorOptions* options) {
-    ffLogoPrintLine();
+    ffPrintBeginLine();
+    ffPrintSetClipping();
 
     if (options->outputColor.length && !instance.config.display.pipe) {
         ffPrintColor(&options->outputColor);
@@ -17,7 +18,7 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
             ffPrintCharTimes(options->string.chars[0], options->times);
         } else {
             for (uint32_t i = 0; i < options->times; i++) {
-                fputs(options->string.chars, stdout);
+                ffPrintS(options->string.chars);
             }
         }
     } else {
@@ -35,7 +36,7 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
             int remaining = (int) titleLength;
             // Write the whole separator as often as it fits fully into titleLength
             for (; remaining >= (int) wcsLength; remaining -= (int) wcsLength) {
-                ffStrbufWriteTo(&options->string, stdout);
+                ffPrintBuffer(&options->string);
             }
 
             if (remaining > 0) {
@@ -55,18 +56,18 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
                         ptr += bytes;
                         remainBytes -= bytes;
                     }
-                    fwrite(options->string.chars, (size_t) (ptr - options->string.chars), 1, stdout);
+                    ffPrintWrite(options->string.chars, (uint32_t) ((size_t) (ptr - options->string.chars)));
                 } else {
-                    fwrite(options->string.chars, (size_t) remaining, 1, stdout);
+                    ffPrintWrite(options->string.chars, (uint32_t) ((size_t) remaining));
                 }
             }
         }
     }
 
     if (options->outputColor.length && !instance.config.display.pipe) {
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+        ffPrintS(FASTFETCH_TEXT_MODIFIER_RESET);
     }
-    putchar('\n');
+    ffPrintC('\n');
 
     return true;
 }

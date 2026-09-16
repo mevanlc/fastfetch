@@ -14,7 +14,7 @@ bool ffPrintLocale(FFLocaleOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&locale, stdout);
+        ffPrintBufferLine(&locale);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(locale, "result") }));
     }

@@ -51,6 +51,8 @@ def print_command(command_prefix: str, flag: dict):
             print(f"{command_prefix}:color:->colors")
         elif type == "command":
             print(f"{command_prefix}::module:->modules")
+        elif flag.get("long") == "wrap":
+            print(f"{command_prefix}::width:(auto off)")
         elif type == "config":
             print(f"{command_prefix}:preset:->presets")
         elif type == "enum":

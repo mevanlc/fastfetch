@@ -58,7 +58,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
 
         if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
-            ffStrbufPutTo(&buffer, stdout);
+            ffPrintBufferLine(&buffer);
         } else {
             FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
             ffSizeAppendNum(sum, &buffer2);
@@ -89,7 +89,7 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(CPUCache), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
         ffSizeAppendNum(sum, &buffer2);

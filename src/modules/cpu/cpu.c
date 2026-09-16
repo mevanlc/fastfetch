@@ -76,7 +76,7 @@ bool ffPrintCPU(FFCPUOptions* options) {
                 ffTempsAppendNum(cpu.temperature, &str, options->tempConfig, &options->moduleArgs);
             }
 
-            ffStrbufPutTo(&str, stdout);
+            ffPrintBufferLine(&str);
         } else {
             FF_STRBUF_AUTO_DESTROY freqBase = ffStrbufCreate();
             ffFreqAppendNum(cpu.frequencyBase, &freqBase);

@@ -22,7 +22,7 @@ bool ffPrintUptime(FFUptimeOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Uptime), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         uint32_t milliseconds = (uint32_t) (uptime % 1000);
         uptime /= 1000;

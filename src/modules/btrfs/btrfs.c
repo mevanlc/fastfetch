@@ -52,7 +52,7 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
         ffStrbufAppendS(&buffer, ", ");
         ffPercentAppendNum(&buffer, allocatedPercentage, options->percent, false, &options->moduleArgs);
         ffStrbufAppendF(&buffer, " allocated)");
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
     } else {
         FF_STRBUF_AUTO_DESTROY usedPercentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

@@ -35,7 +35,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
         }
 
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&str, stdout);
+        ffPrintBufferLine(&str);
         return true;
     }
 
@@ -75,7 +75,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
 
             ffStrbufAppendS(&str, item->builtin ? " [Built-in]" : " [External]");
 
-            ffStrbufPutTo(&str, stdout);
+            ffPrintBufferLine(&str);
         } else {
             FF_STRBUF_AUTO_DESTROY valueNum = ffStrbufCreate();
             if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {

@@ -47,7 +47,8 @@ bool ffPrintColors(FFColorsOptions* options) {
             if (!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND) {
                 ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
             }
-            ffStrbufPutTo(&result, stdout);
+            ffPrintSetBlockWidth(options->symbol == FF_COLORS_SYMBOL_BLOCK || options->symbol == FF_COLORS_SYMBOL_BACKGROUND ? options->block.width : 2);
+            ffPrintBufferLine(&result);
             ffStrbufClear(&result);
         }
 
@@ -120,7 +121,7 @@ bool ffPrintColors(FFColorsOptions* options) {
 
     if (result.length > 0) {
         if (flag) {
-            ffLogoPrintLine();
+            ffPrintBeginLine();
         } else {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             flag = true;
@@ -132,7 +133,8 @@ bool ffPrintColors(FFColorsOptions* options) {
         if (!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND) {
             ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
         }
-        ffStrbufPutTo(&result, stdout);
+        ffPrintSetBlockWidth(options->symbol == FF_COLORS_SYMBOL_BLOCK || options->symbol == FF_COLORS_SYMBOL_BACKGROUND ? options->block.width : 2);
+        ffPrintBufferLine(&result);
     }
 
     if (!flag) {

@@ -34,7 +34,7 @@ bool ffPrintUsers(FFUsersOptions* options) {
                 FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
                 ffStrbufAppend(&result, &user->name);
             }
-            ffStrbufPutTo(&result, stdout);
+            ffPrintBufferLine(&result);
         } else {
             for (uint32_t i = 0; i < users.length; ++i) {
                 FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
@@ -50,7 +50,7 @@ bool ffPrintUsers(FFUsersOptions* options) {
                     ffStrbufAppendF(&result, " - login time %s", ffTimeToShortStr(user->loginTime));
                 }
 
-                ffStrbufPutTo(&result, stdout);
+                ffPrintBufferLine(&result);
             }
         }
     } else {

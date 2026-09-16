@@ -10,6 +10,15 @@ _fastfetch() {
     return
   fi
 
+  if [[ "$cur" == --wrap=* ]]; then
+    COMPREPLY=($(compgen -W "--wrap=auto --wrap=off" -- "$cur"))
+    return
+  fi
+  if [[ "$prev" == --wrap || ( "$prev" == = && "${COMP_WORDS[COMP_CWORD-2]}" == --wrap ) ]]; then
+    COMPREPLY=($(compgen -W "auto off" -- "$cur"))
+    return
+  fi
+
   # Handle standard completion cases
   case "$prev" in
     --color|--color-keys|--color-title|--color-output|--color-separator|--*-color|--*-key-color|--*-output-color|--logo-color-[1-9]|--percent-color-*|--temp-color-*)

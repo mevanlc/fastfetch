@@ -18,3 +18,21 @@ bool ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
 [[gnu::format(printf, 5, 6)]] void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...);
 void ffPrintColor(const FFstrbuf* colorValue);
 void ffPrintCharTimes(char c, uint32_t times);
+
+// Module output passes through these helpers; logo/protocol output stays on stdout.
+void ffPrintBeginLine(void);
+void ffPrintEndModule(void);
+void ffPrintInitFrame(void);
+void ffPrintDestroy(void);
+void ffPrintWrite(const char* text, uint32_t length);
+void ffPrintS(const char* text);
+void ffPrintC(char c);
+void ffPrintLine(const char* text);
+void ffPrintBuffer(const FFstrbuf* buffer);
+void ffPrintBufferLine(const FFstrbuf* buffer);
+void ffPrintVF(const char* format, va_list args);
+[[gnu::format(printf, 1, 2)]] void ffPrintF(const char* format, ...);
+void ffPrintKeyWidth(uint32_t width);
+void ffPrintSetClipping(void);
+void ffPrintSetBlockWidth(uint32_t width);
+void ffPrintStat(double ms, int32_t threshold);

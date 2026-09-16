@@ -16,12 +16,12 @@ bool ffPrintTerminalFont(FFTerminalFontOptions* options) {
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TerminalFont), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            ffStrbufWriteTo(&terminalFont.font.pretty, stdout);
+            ffPrintBuffer(&terminalFont.font.pretty);
             if (terminalFont.fallback.pretty.length) {
-                fputs(" / ", stdout);
-                ffStrbufWriteTo(&terminalFont.fallback.pretty, stdout);
+                ffPrintS(" / ");
+                ffPrintBuffer(&terminalFont.fallback.pretty);
             }
-            putchar('\n');
+            ffPrintC('\n');
         } else {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TerminalFont), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                       FF_ARG(terminalFont.font.pretty, "combined"),

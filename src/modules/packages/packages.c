@@ -140,7 +140,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         assert(output.length >= 2); // counts.all > 0 guarantees that at least one package count was printed, which guarantees that ", " was appended at least once
         ffStrbufSubstrBefore(&output, output.length - 1);
         output.chars[output.length - 1] = '\n';
-        ffStrbufWriteTo(&output, stdout);
+        ffPrintBuffer(&output);
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Packages),
             0,

@@ -19,15 +19,15 @@ bool ffPrintTheme(FFThemeOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Theme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.theme1.length) {
-            ffStrbufWriteTo(&result.theme1, stdout);
+            ffPrintBuffer(&result.theme1);
         }
         if (result.theme2.length) {
             if (result.theme1.length) {
-                fputs(", ", stdout);
+                ffPrintS(", ");
             }
-            ffStrbufWriteTo(&result.theme2, stdout);
+            ffPrintBuffer(&result.theme2);
         }
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Theme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result.theme1, "theme1"),

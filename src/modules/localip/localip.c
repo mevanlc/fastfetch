@@ -122,7 +122,7 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
             }
             printIp(ip, false, &buffer);
         }
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintBufferLine(&buffer);
         ffStrbufClear(&buffer);
     } else {
         FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -133,7 +133,7 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
             if (options->moduleArgs.outputFormat.length == 0) {
                 ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
                 printIp(ip, !(options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT), &buffer);
-                ffStrbufPutTo(&buffer, stdout);
+                ffPrintBufferLine(&buffer);
             } else {
                 if (ip->speed > 0) {
                     appendSpeed(ip, &buffer);

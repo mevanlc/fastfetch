@@ -29,7 +29,7 @@ bool ffPrintMemory(FFMemoryOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Memory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (storage.bytesTotal == 0) {
-            puts("Disabled");
+            ffPrintLine("Disabled");
         } else {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
@@ -47,7 +47,7 @@ bool ffPrintMemory(FFMemoryOptions* options) {
             }
 
             ffStrbufTrimRight(&str, ' ');
-            ffStrbufPutTo(&str, stdout);
+            ffPrintBufferLine(&str);
         }
     } else {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();

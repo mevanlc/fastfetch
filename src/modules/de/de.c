@@ -19,14 +19,14 @@ bool ffPrintDE(FFDEOptions* options) {
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        ffStrbufWriteTo(&result->dePrettyName, stdout);
+        ffPrintBuffer(&result->dePrettyName);
 
         if (version.length > 0) {
-            putchar(' ');
-            ffStrbufWriteTo(&version, stdout);
+            ffPrintC(' ');
+            ffPrintBuffer(&version);
         }
 
-        putchar('\n');
+        ffPrintC('\n');
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result->deProcessName, "process-name"), FF_ARG(result->dePrettyName, "pretty-name"), FF_ARG(version, "version") }));
     }

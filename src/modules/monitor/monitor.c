@@ -40,17 +40,17 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
         if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            printf("%ux%u px", display->width, display->height);
+            ffPrintF("%ux%u px", display->width, display->height);
             if (display->refreshRate > 0) {
-                printf(" @ %g Hz", ((int) (display->refreshRate * 1000 + 0.5)) / 1000.0);
+                ffPrintF(" @ %g Hz", ((int) (display->refreshRate * 1000 + 0.5)) / 1000.0);
             }
             if (inch > 0) {
-                printf(" - %ux%u mm (%.2f inches, %.2f ppi)", display->physicalWidth, display->physicalHeight, inch, ppi);
+                ffPrintF(" - %ux%u mm (%.2f inches, %.2f ppi)", display->physicalWidth, display->physicalHeight, inch, ppi);
             }
             if (hdrCompatible) {
-                fputs(" [HDR Compatible]", stdout);
+                ffPrintS(" [HDR Compatible]");
             }
-            putchar('\n');
+            ffPrintC('\n');
         } else {
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                          FF_ARG(display->name, "name"),

@@ -112,6 +112,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
                 }
             } else {
                 succeeded = baseInfo->printModule(optionBuf);
+                ffPrintEndModule();
             }
             baseInfo->destroyOptions(optionBuf);
             return succeeded;
@@ -344,14 +345,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                 yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(jsonDoc->root);
                 yyjson_mut_obj_add_real(jsonDoc, moduleJson, "stat", ms);
             } else {
-                char str[64];
-                int len = snprintf(str, sizeof str, "%.3fms", ms);
-                if (thres > 0) {
-                    snprintf(str, sizeof str, "\e[%sm%.3fms\e[m", (ms <= thres ? FF_COLOR_FG_GREEN : ms <= 2 * thres ? FF_COLOR_FG_YELLOW
-                                                                                                                     : FF_COLOR_FG_RED),
-                        ms);
-                }
-                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len - 1, str); // Save; Up 1; Right 9999999; Left <len - 1>; Print <str>; Load
+                ffPrintStat(ms, thres);
             }
         }
 

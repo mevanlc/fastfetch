@@ -17,6 +17,53 @@ typedef struct FFLogoCachedLine {
     uint32_t width;
 } FFLogoCachedLine;
 
+static FFstrbuf savedLogo;
+static bool savedLogoValid;
+static bool savedLogoColors;
+
+void ffLogoPrepareWidth(uint32_t width) {
+    FFOptionsLogo* options = &instance.config.logo;
+    instance.state.logoReservedWidth = 0;
+    if (!instance.state.wrapWidth || options->position == FF_LOGO_POSITION_TOP) {
+        return;
+    }
+    uint64_t occupied = (uint64_t) width + options->paddingLeft + options->paddingRight;
+    if (occupied >= instance.state.wrapWidth || instance.state.wrapWidth - occupied < 20) {
+        options->position = FF_LOGO_POSITION_TOP;
+    } else {
+        instance.state.logoReservedWidth = (uint32_t) occupied;
+    }
+}
+
+void ffLogoAppendRight(FFstrbuf* buffer, uint32_t width) {
+    if (instance.state.wrapWidth) {
+        uint32_t used = width + instance.config.logo.paddingRight;
+        ffStrbufAppendF(buffer, "\e[%uG", instance.state.wrapWidth > used ? instance.state.wrapWidth - used + 1 : 1);
+    } else {
+        ffStrbufAppendF(buffer, "\e[9999999C\e[%uD", width + instance.config.logo.paddingRight);
+    }
+}
+
+bool ffLogoObserveSize(uint32_t x, uint32_t y) {
+    if (!instance.state.wrapWidth) {
+        return false;
+    }
+    FFOptionsLogo* options = &instance.config.logo;
+    uint32_t width = options->width;
+    if (!width && x > options->paddingLeft) {
+        width = x - options->paddingLeft - 1;
+    }
+    ffLogoPrepareWidth(width);
+    if (options->position == FF_LOGO_POSITION_TOP) {
+        instance.state.logoTopHeight = y + options->paddingBottom;
+        instance.state.logoWidth = instance.state.logoHeight = 0;
+        fputs("\r\n", stdout);
+        ffPrintCharTimes('\n', options->paddingBottom);
+        return true;
+    }
+    return false;
+}
+
 static void logoLineCacheClear(FFLogoLineCacheState* cache) {
     FF_LIST_FOR_EACH (FFLogoCachedLine, line, cache->lines) {
         ffStrbufDestroy(&line->chars);
@@ -40,6 +87,7 @@ static void logoLineCachePush(const FFstrbuf* chars, uint32_t width, FFLogoLineC
 }
 
 static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bool doColorReplacement) {
+    const char* originalData = data;
     FFOptionsLogo* options = &instance.config.logo;
     bool keepCarryColor = options->type != FF_LOGO_TYPE_IMAGE_CHAFA;
 
@@ -175,6 +223,15 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
         parsedHeight = options->height;
     }
 
+    // maxLineWidth already includes left padding except for a right-side logo.
+    FFLogoPosition oldPosition = options->position;
+    uint32_t includedPadding = oldPosition == FF_LOGO_POSITION_RIGHT ? 0 : options->paddingLeft;
+    ffLogoPrepareWidth(maxLineWidth > includedPadding ? maxLineWidth - includedPadding : 0);
+    if (oldPosition == FF_LOGO_POSITION_RIGHT && options->position == FF_LOGO_POSITION_TOP) {
+        // Rebuild to apply left padding after moving a right logo above the text.
+        logoLineCacheBuild(cache, originalData, doColorReplacement);
+        return;
+    }
     instance.state.logoHeight = options->paddingTop + parsedHeight;
     if (options->position == FF_LOGO_POSITION_LEFT) {
         instance.state.logoWidth = maxLineWidth + options->paddingRight;
@@ -192,6 +249,9 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
 }
 
 static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError) {
+    if (instance.config.logo.width) {
+        ffLogoPrepareWidth(instance.config.logo.width);
+    }
     FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
@@ -208,7 +268,8 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
                 }
                 return false;
             }
-            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;1H", (unsigned) options->paddingTop + 1);
+            ffLogoAppendRight(&buf, options->width);
         }
         ffStrbufAppendNS(&buf, (uint32_t) length, data);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
@@ -230,7 +291,9 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
                 instance.state.logoWidth = X + instance.config.logo.paddingRight - 1;
             }
             instance.state.logoHeight = Y;
-            fputs("\e[H", stdout);
+            if (!ffLogoObserveSize(X, Y)) {
+                fputs("\e[H", stdout);
+            }
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
@@ -239,7 +302,7 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
 
         if (options->position == FF_LOGO_POSITION_RIGHT) {
-            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+            ffLogoAppendRight(&buf, options->width);
         } else if (options->paddingLeft) {
             ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
         }
@@ -253,7 +316,8 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
             ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffStrbufAppendNC(&buf, options->paddingRight, '\n');
+            instance.state.logoTopHeight = options->paddingTop + options->height + (instance.state.wrapWidth ? options->paddingBottom : options->paddingRight);
+            ffStrbufAppendNC(&buf, instance.state.wrapWidth ? options->paddingBottom : options->paddingRight, '\n');
         } else if (options->position == FF_LOGO_POSITION_RIGHT) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffStrbufAppendF(&buf, "\e[%uA", (unsigned) options->height);
@@ -268,6 +332,14 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement) {
     FFOptionsLogo* options = &instance.config.logo;
     FFLogoLineCacheState* cache = &instance.state.logoLineCache;
 
+    if (!savedLogoValid || data != savedLogo.chars) {
+        if (!savedLogoValid) {
+            ffStrbufInit(&savedLogo);
+        }
+        ffStrbufSetS(&savedLogo, data);
+        savedLogoValid = true;
+        savedLogoColors = doColorReplacement;
+    }
     logoLineCacheBuild(cache, data, doColorReplacement);
 
     if (options->position != FF_LOGO_POSITION_TOP) {
@@ -280,6 +352,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement) {
         ffStrbufAppendC(&result, '\n');
     }
     ffStrbufAppendNC(&result, options->paddingBottom, '\n');
+    instance.state.logoTopHeight = cache->lines.length + options->paddingBottom;
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &result);
     instance.state.logoWidth = instance.state.logoHeight = 0;
     logoLineCacheClear(cache);
@@ -695,10 +768,11 @@ void ffLogoPrintLine(void) {
             FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, cache->nextLine);
 
             if (logo->position == FF_LOGO_POSITION_RIGHT) {
-                printf("\033[9999999C\033[%uD", cache->rightOffset);
-                ffStrbufWriteTo(&line->chars, stdout);
-
-                fputs("\033[G", stdout);
+                if (!instance.state.wrapWidth) {
+                    printf("\033[9999999C\033[%uD", cache->rightOffset);
+                    ffStrbufWriteTo(&line->chars, stdout);
+                    fputs("\033[G", stdout);
+                }
             } else {
                 ffStrbufWriteTo(&line->chars, stdout);
 
@@ -723,7 +797,20 @@ void ffLogoPrintLine(void) {
     ++instance.state.keysHeight;
 }
 
+void ffLogoPrintLineEnd(uint32_t textWidth) {
+    FFLogoLineCacheState* cache = &instance.state.logoLineCache;
+    if (!instance.state.wrapWidth || instance.config.logo.position != FF_LOGO_POSITION_RIGHT ||
+        instance.state.keysHeight == 0 || instance.state.keysHeight > cache->lines.length) {
+        return;
+    }
+    FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, instance.state.keysHeight - 1);
+    uint32_t column = instance.state.wrapWidth - instance.state.logoReservedWidth + instance.config.logo.paddingLeft;
+    ffPrintCharTimes(' ', textWidth < column ? column - textWidth : 0);
+    ffStrbufWriteTo(&line->chars, stdout);
+}
+
 void ffLogoPrintRemaining(void) {
+    ffPrintEndModule();
     FFLogoLineCacheState* cache = &instance.state.logoLineCache;
     FFOptionsLogo* logo = &instance.config.logo;
 
@@ -732,7 +819,11 @@ void ffLogoPrintRemaining(void) {
             FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, cache->nextLine);
 
             if (logo->position == FF_LOGO_POSITION_RIGHT) {
-                printf("\033[9999999C\033[%uD", cache->rightOffset);
+                if (instance.state.wrapWidth) {
+                    ffPrintCharTimes(' ', instance.state.wrapWidth - instance.state.logoReservedWidth + logo->paddingLeft);
+                } else {
+                    printf("\033[9999999C\033[%uD", cache->rightOffset);
+                }
             }
             ffStrbufPutTo(&line->chars, stdout);
 
@@ -752,6 +843,24 @@ void ffLogoPrintRemaining(void) {
         ffPrintCharTimes('\n', instance.state.logoHeight - instance.state.keysHeight + 1);
     }
     instance.state.keysHeight = instance.state.logoHeight + 1;
+}
+
+void ffLogoPrintFrame(FFLogoPosition requestedPosition) {
+    instance.config.logo.position = requestedPosition;
+    instance.state.logoWidth = instance.state.logoHeight = instance.state.logoReservedWidth = instance.state.logoTopHeight = 0;
+    if (savedLogoValid) {
+        ffLogoPrintChars(savedLogo.chars, savedLogoColors);
+    } else {
+        ffLogoPrint();
+    }
+}
+
+void ffLogoDestroy(void) {
+    logoLineCacheClear(&instance.state.logoLineCache);
+    if (savedLogoValid) {
+        ffStrbufDestroy(&savedLogo);
+        savedLogoValid = false;
+    }
 }
 
 void ffLogoBuiltinPrint(void) {
